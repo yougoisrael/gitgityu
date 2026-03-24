@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Gemini × GitHub Assistant</title>
+<title>AI × GitHub Assistant</title>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -12,6 +12,7 @@
   --border:#30363d;--text:#e6edf3;--muted:#8b949e;
   --gem:#a855f7;--gem2:#7c3aed;--blue:#1f6feb;
   --green:#238636;--red:#f85149;
+  --groq:#f97316;--hf:#ff9900;
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
 body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
@@ -30,6 +31,16 @@ header{
 .logo h1{font-size:15px;font-weight:700;letter-spacing:-.3px}
 .logo h1 span{color:var(--gem)}
 .logo p{font-size:11px;color:var(--muted);margin-top:1px}
+.header-right{display:flex;align-items:center;gap:8px}
+
+/* Provider selector */
+.provider-select{
+  background:var(--surface2);border:1px solid var(--border);color:var(--text);
+  padding:6px 10px;border-radius:8px;font-size:12px;cursor:pointer;outline:none;
+  transition:border .2s
+}
+.provider-select:focus{border-color:var(--gem)}
+
 .setup-toggle{
   background:var(--surface2);border:1px solid var(--border);color:var(--text);
   padding:6px 14px;border-radius:8px;cursor:pointer;font-size:12px;gap:6px;display:flex;align-items:center
@@ -46,11 +57,11 @@ header{
 #setupPanel.open{display:flex}
 #setupPanel label{font-size:12px;color:var(--muted);margin-bottom:3px;display:block}
 .field{flex:1;min-width:220px}
-.field input{
+.field input,.field select{
   width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);
   padding:8px 12px;border-radius:8px;font-size:13px;outline:none;transition:border .2s
 }
-.field input:focus{border-color:var(--gem)}
+.field input:focus,.field select:focus{border-color:var(--gem)}
 .save-btn{
   align-self:flex-end;background:linear-gradient(135deg,var(--gem),var(--gem2));
   color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;
@@ -58,6 +69,20 @@ header{
 }
 .save-btn:hover{opacity:.9}
 #saveStatus{align-self:flex-end;font-size:12px;color:var(--muted)}
+
+/* Provider sections */
+.provider-section{
+  width:100%;display:none;flex-wrap:wrap;gap:10px;
+  padding-top:10px;border-top:1px solid var(--border);margin-top:4px
+}
+.provider-section.active{display:flex}
+.section-label{
+  width:100%;font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--muted);margin-bottom:4px
+}
+.provider-section.gemini-sec .section-label{color:var(--gem)}
+.provider-section.groq-sec .section-label{color:var(--groq)}
+.provider-section.hf-sec .section-label{color:var(--hf)}
 
 /* ── Chat ────────────────────────────────────────────────── */
 #chatArea{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
@@ -75,6 +100,8 @@ header{
 }
 .msg.user .av{background:var(--blue)}
 .msg.assistant .av{background:linear-gradient(135deg,var(--gem),var(--gem2))}
+.msg.assistant.groq-msg .av{background:linear-gradient(135deg,var(--groq),#ea580c)}
+.msg.assistant.hf-msg .av{background:linear-gradient(135deg,var(--hf),#f59e0b)}
 
 .bubble{
   background:var(--surface);border:1px solid var(--border);
@@ -162,10 +189,27 @@ header{
   font-size:11px;color:var(--muted);text-align:center;padding:4px 0 0;
 }
 .model-badge span{color:var(--gem)}
+.model-badge span.groq-badge{color:var(--groq)}
+.model-badge span.hf-badge{color:var(--hf)}
 
 /* Welcome bullets */
 .welcome-list{margin-top:10px;padding-right:18px;display:flex;flex-direction:column;gap:5px}
 .welcome-list li{list-style:none;padding:2px 0}
+
+/* Provider pill */
+.provider-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  border-radius:20px;padding:2px 10px;font-size:11px;font-weight:600;margin-bottom:6px
+}
+.provider-pill.gemini{background:rgba(168,85,247,.15);color:var(--gem);border:1px solid rgba(168,85,247,.3)}
+.provider-pill.groq{background:rgba(249,115,22,.15);color:var(--groq);border:1px solid rgba(249,115,22,.3)}
+.provider-pill.hf{background:rgba(255,153,0,.15);color:var(--hf);border:1px solid rgba(255,153,0,.3)}
+
+/* HF note */
+.hf-note{
+  font-size:11px;color:var(--muted);background:rgba(255,153,0,.06);
+  border:1px solid rgba(255,153,0,.2);border-radius:6px;padding:6px 10px;margin-top:4px
+}
 
 @media(max-width:600px){
   .msg{max-width:98%}
@@ -180,22 +224,27 @@ header{
   <div class="logo">
     <div class="logo-icon">🤖</div>
     <div>
-      <h1>Gemini <span>×</span> GitHub</h1>
+      <h1>AI <span>×</span> GitHub</h1>
       <p>Developer Assistant</p>
     </div>
   </div>
-  <button class="setup-toggle" onclick="toggleSetup()">
-    <span class="dot" id="statusDot"></span>
-    <span id="toggleLabel">⚙️ الإعدادات</span>
-  </button>
+  <div class="header-right">
+    <select class="provider-select" id="providerSelect" onchange="switchProvider(this.value)" title="اختر مزود الذكاء الاصطناعي">
+      <option value="gemini">🔮 Gemini</option>
+      <option value="groq">⚡ Groq</option>
+      <option value="hf">🤗 Hugging Face</option>
+    </select>
+    <button class="setup-toggle" onclick="toggleSetup()">
+      <span class="dot" id="statusDot"></span>
+      <span id="toggleLabel">⚙️ الإعدادات</span>
+    </button>
+  </div>
 </header>
 
 <!-- Setup Panel -->
 <div id="setupPanel">
-  <div class="field">
-    <label>🔑 Gemini API Key (Google AI Studio)</label>
-    <input type="password" id="geminiKey" placeholder="AIza..." />
-  </div>
+
+  <!-- Common: GitHub -->
   <div class="field">
     <label>🐙 GitHub Token (repo + workflow scope)</label>
     <input type="password" id="githubToken" placeholder="ghp_..." />
@@ -204,6 +253,69 @@ header{
     <label>👤 GitHub Username</label>
     <input type="text" id="githubUser" placeholder="username" />
   </div>
+
+  <!-- Gemini Section -->
+  <div class="provider-section gemini-sec active" id="geminiSection">
+    <div class="section-label">🔮 Gemini — Google AI Studio</div>
+    <div class="field">
+      <label>🔑 Gemini API Key</label>
+      <input type="password" id="geminiKey" placeholder="AIza..." />
+    </div>
+    <div class="field" style="max-width:200px">
+      <label>🧠 النموذج</label>
+      <select id="geminiModel">
+        <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+        <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
+        <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+        <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Groq Section -->
+  <div class="provider-section groq-sec" id="groqSection">
+    <div class="section-label">⚡ Groq — Ultra-fast Inference</div>
+    <div class="field">
+      <label>🔑 Groq API Key</label>
+      <input type="password" id="groqKey" placeholder="gsk_..." />
+    </div>
+    <div class="field" style="max-width:240px">
+      <label>🧠 النموذج</label>
+      <select id="groqModel">
+        <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile</option>
+        <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant</option>
+        <option value="llama3-70b-8192">Llama3 70B</option>
+        <option value="llama3-8b-8192">Llama3 8B</option>
+        <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+        <option value="gemma2-9b-it">Gemma2 9B</option>
+        <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 Distill 70B</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Hugging Face Section -->
+  <div class="provider-section hf-sec" id="hfSection">
+    <div class="section-label">🤗 Hugging Face — Inference API</div>
+    <div class="field">
+      <label>🔑 HF Token</label>
+      <input type="password" id="hfKey" placeholder="hf_..." />
+    </div>
+    <div class="field" style="max-width:280px">
+      <label>🧠 النموذج</label>
+      <select id="hfModel">
+        <option value="mistralai/Mistral-7B-Instruct-v0.3">Mistral 7B Instruct v0.3</option>
+        <option value="mistralai/Mixtral-8x7B-Instruct-v0.1">Mixtral 8x7B Instruct</option>
+        <option value="meta-llama/Llama-3.2-3B-Instruct">Llama 3.2 3B Instruct</option>
+        <option value="meta-llama/Meta-Llama-3-8B-Instruct">Llama 3 8B Instruct</option>
+        <option value="HuggingFaceH4/zephyr-7b-beta">Zephyr 7B Beta</option>
+        <option value="Qwen/Qwen2.5-72B-Instruct">Qwen 2.5 72B Instruct</option>
+      </select>
+    </div>
+    <div class="hf-note" style="align-self:flex-end">
+      ⚠️ Hugging Face لا يدعم function calling — GitHub tools غير متاحة في هذا الوضع
+    </div>
+  </div>
+
   <button class="save-btn" onclick="saveSettings()">💾 حفظ</button>
   <span id="saveStatus"></span>
 </div>
@@ -213,8 +325,15 @@ header{
   <div class="msg assistant">
     <div class="av">🤖</div>
     <div class="bubble">
-      مرحباً! أنا مساعدك للتطوير — مدعوم بـ <code>Gemini 2.0 Flash</code> 🚀
+      مرحباً! أنا مساعدك للتطوير 🚀
+      <br><br>
+      اختر مزود الذكاء الاصطناعي من الأعلى:
       <ul class="welcome-list">
+        <li><span class="provider-pill gemini">🔮 Gemini</span> — أذكى + GitHub tools كاملة</li>
+        <li><span class="provider-pill groq">⚡ Groq</span> — أسرع إجابة + GitHub tools كاملة</li>
+        <li><span class="provider-pill hf">🤗 HF</span> — نماذج مفتوحة المصدر</li>
+      </ul>
+      <ul class="welcome-list" style="margin-top:10px">
         <li>📁 ارفع ملف <code>.zip</code> وأنا أقرأ كل الكود</li>
         <li>🆕 أنشئ مستودع GitHub جديد بأمر واحد</li>
         <li>🚀 ارفع مشروع كامل على GitHub دفعة واحدة</li>
@@ -236,23 +355,44 @@ header{
       onkeydown="handleKey(event)" oninput="resize(this)" rows="1"></textarea>
     <button id="sendBtn" onclick="send()" title="إرسال">↑</button>
   </div>
-  <div class="model-badge">gemini-2.0-flash · Google AI Studio Free · <span>GitHub REST API v3</span></div>
+  <div class="model-badge" id="modelBadge">gemini-2.0-flash · <span>GitHub REST API v3</span></div>
 </div>
 
 <script>
 // ─── State ───────────────────────────────────────────────
 let GEMINI_KEY = '', GH_TOKEN = '', GH_USER = '';
-let history = [];          // Gemini conversation
-let zipFiles = {};         // { path: textContent }
-let zipName  = '';
-let busy     = false;
+let GROQ_KEY   = '';
+let HF_KEY     = '';
+let PROVIDER   = 'gemini'; // 'gemini' | 'groq' | 'hf'
+let history    = [];
+let zipFiles   = {};
+let zipName    = '';
+let busy       = false;
 
 // ─── Init ────────────────────────────────────────────────
 (function init() {
-  GEMINI_KEY = ls('gk');  GH_TOKEN = ls('ght');  GH_USER = ls('ghu');
+  GEMINI_KEY = ls('gk');
+  GH_TOKEN   = ls('ght');
+  GH_USER    = ls('ghu');
+  GROQ_KEY   = ls('groqk');
+  HF_KEY     = ls('hfk');
+  PROVIDER   = ls('provider') || 'gemini';
+
   if (GEMINI_KEY) document.getElementById('geminiKey').value = GEMINI_KEY;
   if (GH_TOKEN)   document.getElementById('githubToken').value = GH_TOKEN;
   if (GH_USER)    document.getElementById('githubUser').value = GH_USER;
+  if (GROQ_KEY)   document.getElementById('groqKey').value = GROQ_KEY;
+  if (HF_KEY)     document.getElementById('hfKey').value = HF_KEY;
+
+  const savedGeminiModel = ls('geminiModel');
+  const savedGroqModel   = ls('groqModel');
+  const savedHfModel     = ls('hfModel');
+  if (savedGeminiModel) document.getElementById('geminiModel').value = savedGeminiModel;
+  if (savedGroqModel)   document.getElementById('groqModel').value   = savedGroqModel;
+  if (savedHfModel)     document.getElementById('hfModel').value     = savedHfModel;
+
+  document.getElementById('providerSelect').value = PROVIDER;
+  switchProvider(PROVIDER, true);
   updateDot();
 })();
 
@@ -262,18 +402,64 @@ function saveSettings() {
   GEMINI_KEY = document.getElementById('geminiKey').value.trim();
   GH_TOKEN   = document.getElementById('githubToken').value.trim();
   GH_USER    = document.getElementById('githubUser').value.trim();
+  GROQ_KEY   = document.getElementById('groqKey').value.trim();
+  HF_KEY     = document.getElementById('hfKey').value.trim();
+
   if (GEMINI_KEY) localStorage.setItem('gk', GEMINI_KEY);
   if (GH_TOKEN)   localStorage.setItem('ght', GH_TOKEN);
   if (GH_USER)    localStorage.setItem('ghu', GH_USER);
+  if (GROQ_KEY)   localStorage.setItem('groqk', GROQ_KEY);
+  if (HF_KEY)     localStorage.setItem('hfk', HF_KEY);
+
+  localStorage.setItem('geminiModel', document.getElementById('geminiModel').value);
+  localStorage.setItem('groqModel',   document.getElementById('groqModel').value);
+  localStorage.setItem('hfModel',     document.getElementById('hfModel').value);
+  localStorage.setItem('provider',    PROVIDER);
+
   updateDot();
+  updateModelBadge();
   const s = document.getElementById('saveStatus');
   s.textContent = '✅ تم الحفظ';
   setTimeout(()=>s.textContent='', 2000);
 }
 
 function updateDot() {
-  const on = GEMINI_KEY && GH_TOKEN && GH_USER;
+  let hasKey = false;
+  if (PROVIDER === 'gemini') hasKey = !!GEMINI_KEY;
+  if (PROVIDER === 'groq')   hasKey = !!GROQ_KEY;
+  if (PROVIDER === 'hf')     hasKey = !!HF_KEY;
+  const on = hasKey && (PROVIDER === 'hf' || (GH_TOKEN && GH_USER));
   document.getElementById('statusDot').className = 'dot' + (on ? ' on' : '');
+}
+
+function switchProvider(val, silent) {
+  PROVIDER = val;
+  // Show/hide sections
+  document.getElementById('geminiSection').className = 'provider-section gemini-sec' + (val==='gemini'?' active':'');
+  document.getElementById('groqSection').className   = 'provider-section groq-sec'   + (val==='groq'?' active':'');
+  document.getElementById('hfSection').className     = 'provider-section hf-sec'     + (val==='hf'?' active':'');
+  updateDot();
+  updateModelBadge();
+  if (!silent) {
+    history = []; // reset conversation on provider switch
+    const emoji = val==='gemini'?'🔮':val==='groq'?'⚡':'🤗';
+    const name  = val==='gemini'?'Gemini':val==='groq'?'Groq':'Hugging Face';
+    addMsg('assistant', `${emoji} تم التبديل إلى <strong>${name}</strong>. المحادثة أُعيدت من البداية.`);
+  }
+}
+
+function updateModelBadge() {
+  const badge = document.getElementById('modelBadge');
+  if (PROVIDER === 'gemini') {
+    const m = document.getElementById('geminiModel').value;
+    badge.innerHTML = `${m} · <span>GitHub REST API v3</span>`;
+  } else if (PROVIDER === 'groq') {
+    const m = document.getElementById('groqModel').value;
+    badge.innerHTML = `⚡ ${m} · <span class="groq-badge">Groq</span> · <span>GitHub REST API v3</span>`;
+  } else {
+    const m = document.getElementById('hfModel').value;
+    badge.innerHTML = `🤗 ${m.split('/')[1]||m} · <span class="hf-badge">Hugging Face</span> · <em style="color:var(--red)">no GitHub tools</em>`;
+  }
 }
 
 function toggleSetup() {
@@ -302,7 +488,6 @@ async function handleZip(e) {
     if (entry.dir) return;
     const ext = p.split('.').pop().toLowerCase();
     const base = p.split('/').pop();
-    // skip binary, node_modules, .git
     if (p.includes('node_modules/') || p.includes('.git/')) return;
     if (!TEXT_EXT.has(ext) && !base.startsWith('.')) return;
     ops.push(entry.async('string').then(c=>{ zipFiles[p]=c }).catch(()=>{}));
@@ -313,14 +498,12 @@ async function handleZip(e) {
   const prev  = document.getElementById('filePreview');
   prev.innerHTML = `<div class="file-chip">📁 <strong>${file.name}</strong><span>${count} ملف نصي</span></div>`;
 
-  // Auto message
   const tree = Object.keys(zipFiles).slice(0,40).map(p=>`• ${p}`).join('\n');
   addMsg('assistant',
     `✅ تم تحميل <code>${file.name}</code> — <strong>${count} ملف</strong>\n\n`+
     `<pre>${tree}${count>40?`\n... و${count-40} ملف آخر`:''}</pre>\n\n`+
     `ماذا تريد أن أفعل بهذا المشروع؟ يمكنني رفعه على GitHub، تحليله، أو تعديله.`
   );
-  // Add to gemini history as a context message
   history.push({
     role:'user',
     parts:[{text:`[رفعت ملف ZIP: ${file.name}، ${count} ملف نصي]\n${tree}`}]
@@ -344,10 +527,14 @@ function addMsg(role, html, toolBlocks){
   const chat = document.getElementById('chatArea');
   const wrap = document.createElement('div');
   wrap.className = `msg ${role}`;
+  if (role === 'assistant') {
+    if (PROVIDER === 'groq') wrap.classList.add('groq-msg');
+    if (PROVIDER === 'hf')   wrap.classList.add('hf-msg');
+  }
 
   const av = document.createElement('div');
   av.className = 'av';
-  av.textContent = role==='user' ? '👤' : '🤖';
+  av.textContent = role==='user' ? '👤' : (PROVIDER==='groq'?'⚡':PROVIDER==='hf'?'🤗':'🤖');
 
   const bub = document.createElement('div');
   bub.className = 'bubble';
@@ -380,7 +567,6 @@ function addMsg(role, html, toolBlocks){
 }
 
 function appendToolResult(bub, toolName, result, isErr){
-  // find last tool-block with that name
   const blocks = bub.querySelectorAll('.tool-block');
   let target = null;
   blocks.forEach(b=>{ if(b.querySelector('.tool-name')?.textContent.includes(toolName)) target=b; });
@@ -396,7 +582,10 @@ function showThinking(){
   const chat = document.getElementById('chatArea');
   const d = document.createElement('div');
   d.className='msg assistant'; d.id='thinking';
-  d.innerHTML=`<div class="av">🤖</div><div class="bubble"><div class="thinking"><b></b><b></b><b></b></div></div>`;
+  const emoji = PROVIDER==='groq'?'⚡':PROVIDER==='hf'?'🤗':'🤖';
+  if(PROVIDER==='groq') d.classList.add('groq-msg');
+  if(PROVIDER==='hf')   d.classList.add('hf-msg');
+  d.innerHTML=`<div class="av">${emoji}</div><div class="bubble"><div class="thinking"><b></b><b></b><b></b></div></div>`;
   chat.appendChild(d);
   chat.scrollTop=chat.scrollHeight;
 }
@@ -428,197 +617,177 @@ async function gh(method, path, body){
   return d;
 }
 
-function b64enc(str){
-  // safe for unicode
-  return btoa(unescape(encodeURIComponent(str)));
-}
-function b64dec(str){
-  return decodeURIComponent(escape(atob(str.replace(/\n/g,''))));
-}
+function b64enc(str){ return btoa(unescape(encodeURIComponent(str))); }
+function b64dec(str){ return decodeURIComponent(escape(atob(str.replace(/\n/g,'')))); }
 
 async function getDefaultBranch(owner, repo){
   const info = await gh('GET',`/repos/${owner}/${repo}`);
   return info.default_branch || 'main';
 }
 
-const TOOLS = [{ function_declarations:[
+// ─── Tools (shared Gemini + Groq) ────────────────────────
+const TOOL_DECLARATIONS = [
   {
     name:'create_repository',
     description:'Create a new GitHub repository for the user',
-    parameters:{ type:'OBJECT', properties:{
-      name:{type:'STRING', description:'Repo name (no spaces)'},
-      description:{type:'STRING', description:'Short description'},
-      private:{type:'BOOLEAN', description:'Private repo?'}
+    parameters:{ type:'object', properties:{
+      name:{type:'string', description:'Repo name (no spaces)'},
+      description:{type:'string', description:'Short description'},
+      private:{type:'boolean', description:'Private repo?'}
     }, required:['name']}
   },
   {
     name:'push_files_to_repo',
     description:'Push multiple files to a GitHub repo in ONE commit. Perfect for uploading a full project.',
-    parameters:{ type:'OBJECT', properties:{
-      owner:{type:'STRING', description:'GitHub username/owner'},
-      repo:{type:'STRING', description:'Repository name'},
-      files:{
-        type:'ARRAY', description:'Files to push',
-        items:{ type:'OBJECT', properties:{
-          path:{type:'STRING', description:'File path inside repo e.g. src/index.js'},
-          content:{type:'STRING', description:'Full file content as plain text'}
-        }, required:['path','content']}
-      },
-      commit_message:{type:'STRING', description:'Commit message'}
+    parameters:{ type:'object', properties:{
+      owner:{type:'string'},repo:{type:'string'},
+      files:{type:'array',items:{type:'object',properties:{path:{type:'string'},content:{type:'string'}},required:['path','content']}},
+      commit_message:{type:'string'}
     }, required:['owner','repo','files','commit_message']}
   },
   {
     name:'update_file',
     description:'Create or update a single file in a GitHub repository',
-    parameters:{ type:'OBJECT', properties:{
-      owner:{type:'STRING'},repo:{type:'STRING'},
-      path:{type:'STRING', description:'e.g. README.md or src/App.jsx'},
-      content:{type:'STRING', description:'Full new content of the file'},
-      message:{type:'STRING', description:'Commit message'}
+    parameters:{ type:'object', properties:{
+      owner:{type:'string'},repo:{type:'string'},
+      path:{type:'string'},content:{type:'string'},message:{type:'string'}
     }, required:['owner','repo','path','content','message']}
   },
   {
     name:'get_file_contents',
     description:'Read a file from a GitHub repository',
-    parameters:{ type:'OBJECT', properties:{
-      owner:{type:'STRING'},repo:{type:'STRING'},
-      path:{type:'STRING', description:'File path'}
+    parameters:{ type:'object', properties:{
+      owner:{type:'string'},repo:{type:'string'},path:{type:'string'}
     }, required:['owner','repo','path']}
   },
   {
     name:'list_repository_contents',
     description:'List files and folders in a directory of a GitHub repository',
-    parameters:{ type:'OBJECT', properties:{
-      owner:{type:'STRING'},repo:{type:'STRING'},
-      path:{type:'STRING', description:'Directory path. Use empty string for root.'}
+    parameters:{ type:'object', properties:{
+      owner:{type:'string'},repo:{type:'string'},
+      path:{type:'string', description:'Directory path. Use empty string for root.'}
     }, required:['owner','repo']}
   },
   {
     name:'delete_file',
     description:'Delete a file from a GitHub repository',
-    parameters:{ type:'OBJECT', properties:{
-      owner:{type:'STRING'},repo:{type:'STRING'},
-      path:{type:'STRING'},
-      message:{type:'STRING', description:'Commit message'}
+    parameters:{ type:'object', properties:{
+      owner:{type:'string'},repo:{type:'string'},path:{type:'string'},message:{type:'string'}
     }, required:['owner','repo','path','message']}
   }
-]}];
+];
+
+// Gemini format
+const GEMINI_TOOLS = [{ function_declarations: TOOL_DECLARATIONS.map(t=>({
+  name: t.name,
+  description: t.description,
+  parameters: {
+    type: 'OBJECT',
+    properties: Object.fromEntries(
+      Object.entries(t.parameters.properties).map(([k,v])=>[k,{...v, type:v.type.toUpperCase()}])
+    ),
+    required: t.parameters.required
+  }
+})) }];
+
+// Groq/OpenAI format
+const GROQ_TOOLS = TOOL_DECLARATIONS.map(t=>({
+  type: 'function',
+  function: { name: t.name, description: t.description, parameters: t.parameters }
+}));
 
 async function execTool(name, args){
   switch(name){
-
     case 'create_repository': {
       const r = await gh('POST','/user/repos',{
-        name: args.name,
-        description: args.description||'',
-        private: args.private||false,
-        auto_init: true
+        name:args.name, description:args.description||'',
+        private:args.private||false, auto_init:true
       });
       return { success:true, full_name:r.full_name, url:r.html_url };
     }
-
     case 'push_files_to_repo': {
       const { owner, repo, files, commit_message } = args;
       const branch = await getDefaultBranch(owner, repo);
-
-      // get latest commit
-      const ref = await gh('GET',`/repos/${owner}/${repo}/git/refs/heads/${branch}`);
+      const ref  = await gh('GET',`/repos/${owner}/${repo}/git/refs/heads/${branch}`);
       const latestSha = ref.object.sha;
       const commitInfo = await gh('GET',`/repos/${owner}/${repo}/git/commits/${latestSha}`);
       const baseTree = commitInfo.tree.sha;
-
-      // create blobs in parallel (batches of 5 to avoid rate limit)
       const batchSize = 5;
       const treeItems = [];
       for(let i=0;i<files.length;i+=batchSize){
         const batch = files.slice(i,i+batchSize);
         const blobs = await Promise.all(batch.map(f=>
           gh('POST',`/repos/${owner}/${repo}/git/blobs`,{
-            content: b64enc(f.content), encoding:'base64'
+            content:b64enc(f.content), encoding:'base64'
           }).then(b=>({ path:f.path, mode:'100644', type:'blob', sha:b.sha }))
         ));
         treeItems.push(...blobs);
       }
-
       const tree   = await gh('POST',`/repos/${owner}/${repo}/git/trees`,{ base_tree:baseTree, tree:treeItems });
       const commit = await gh('POST',`/repos/${owner}/${repo}/git/commits`,{
-        message: commit_message, tree: tree.sha, parents:[latestSha]
+        message:commit_message, tree:tree.sha, parents:[latestSha]
       });
       await gh('PATCH',`/repos/${owner}/${repo}/git/refs/heads/${branch}`,{ sha:commit.sha });
-
       return { success:true, files_pushed:files.length, commit:commit.sha.slice(0,7), branch, repo:`${owner}/${repo}` };
     }
-
     case 'update_file': {
       const { owner, repo, path, content, message } = args;
       let sha;
-      try {
-        const ex = await gh('GET',`/repos/${owner}/${repo}/contents/${path}`);
-        sha = ex.sha;
-      } catch(_){}
-      const body = { message, content: b64enc(content) };
+      try { const ex = await gh('GET',`/repos/${owner}/${repo}/contents/${path}`); sha=ex.sha; } catch(_){}
+      const body = { message, content:b64enc(content) };
       if(sha) body.sha = sha;
       await gh('PUT',`/repos/${owner}/${repo}/contents/${path}`, body);
       return { success:true, path };
     }
-
     case 'get_file_contents': {
       const d = await gh('GET',`/repos/${args.owner}/${args.repo}/contents/${args.path}`);
       const text = b64dec(d.content);
-      return { path:args.path, size:d.size, content: text.slice(0,6000) + (text.length>6000?'\n...(مقتطع)':'') };
+      return { path:args.path, size:d.size, content:text.slice(0,6000)+(text.length>6000?'\n...(مقتطع)':'') };
     }
-
     case 'list_repository_contents': {
       const items = await gh('GET',`/repos/${args.owner}/${args.repo}/contents/${args.path||''}`);
       return { items: items.map(i=>({ name:i.name, type:i.type, path:i.path, size:i.size })) };
     }
-
     case 'delete_file': {
       const ex = await gh('GET',`/repos/${args.owner}/${args.repo}/contents/${args.path}`);
       await gh('DELETE',`/repos/${args.owner}/${args.repo}/contents/${args.path}`,{
-        message: args.message, sha: ex.sha
+        message:args.message, sha:ex.sha
       });
       return { success:true, deleted:args.path };
     }
-
     default: return { error:'أداة غير معروفة: '+name };
   }
 }
 
-// ─── Gemini ───────────────────────────────────────────────
-function buildSystem(){
+// ─── System Prompt (shared) ───────────────────────────────
+function buildSystemPrompt(){
   const fileList = Object.keys(zipFiles);
   let filesCtx = '';
   if(fileList.length>0){
-    // Include actual file content (first 1500 chars per file, max 40 files)
     const relevant = fileList.slice(0, 40);
     filesCtx = `\n\n== ملفات المشروع المرفوع (${fileList.length} ملف) ==\n`+
       relevant.map(p=>`\n--- ${p} ---\n${zipFiles[p].slice(0,1500)}${zipFiles[p].length>1500?'\n...(مقتطع)':''}`).join('');
   }
-  return {
-    parts:[{ text:
-      `أنت مساعد تطوير خبير يتحدث العربية.
+  return `أنت مساعد تطوير خبير يتحدث العربية.
 لديك صلاحيات كاملة على GitHub للمستخدم: ${GH_USER||'(غير محدد)'}.
 يمكنك إنشاء مستودعات، رفع مشاريع كاملة، تعديل وإضافة وحذف ملفات.
-
 عند رفع مشروع ZIP: استخدم push_files_to_repo لرفع جميع الملفات دفعة واحدة.
 إذا طُلب إنشاء مستودع جديد ثم رفع المشروع: اعمل create_repository أولاً ثم push_files_to_repo.
-كن موجزاً وعملياً. اذكر روابط GitHub عند الانتهاء.
-${filesCtx}`
-    }]
-  };
+كن موجزاً وعملياً. اذكر روابط GitHub عند الانتهاء.${filesCtx}`;
 }
 
+// ─── Gemini Call ──────────────────────────────────────────
 async function callGemini(msgs){
+  const model = document.getElementById('geminiModel').value || 'gemini-2.0-flash';
   const r = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_KEY}`,
     {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        system_instruction: buildSystem(),
+        system_instruction:{ parts:[{ text: buildSystemPrompt() }] },
         contents: msgs,
-        tools: TOOLS,
+        tools: GEMINI_TOOLS,
         tool_config:{ function_calling_config:{ mode:'AUTO' } },
         generation_config:{ temperature:0.7, max_output_tokens:8192 }
       })
@@ -629,13 +798,117 @@ async function callGemini(msgs){
   return d;
 }
 
+// ─── Groq Call ────────────────────────────────────────────
+function geminiHistoryToOpenAI(msgs) {
+  return msgs.map(m => {
+    if (m.role === 'user') {
+      const fnResults = m.parts?.filter(p=>p.functionResponse);
+      if (fnResults && fnResults.length > 0) {
+        return fnResults.map(p=>({
+          role: 'tool',
+          tool_call_id: p.functionResponse.name,
+          content: JSON.stringify(p.functionResponse.response)
+        }));
+      }
+      return [{ role:'user', content: m.parts?.map(p=>p.text||'').join('') || '' }];
+    }
+    if (m.role === 'model') {
+      const textParts = m.parts?.filter(p=>p.text).map(p=>p.text).join('') || '';
+      const fnCalls   = m.parts?.filter(p=>p.functionCall)||[];
+      const msg = { role:'assistant', content: textParts||null };
+      if (fnCalls.length > 0) {
+        msg.tool_calls = fnCalls.map((p,i)=>({
+          id: p.functionCall.name + '_' + i,
+          type: 'function',
+          function: { name: p.functionCall.name, arguments: JSON.stringify(p.functionCall.args) }
+        }));
+      }
+      return [msg];
+    }
+    return [];
+  }).flat().filter(Boolean);
+}
+
+async function callGroq(msgs) {
+  const model = document.getElementById('groqModel').value || 'llama-3.3-70b-versatile';
+  const openAIMsgs = [
+    { role:'system', content: buildSystemPrompt() },
+    ...geminiHistoryToOpenAI(msgs)
+  ];
+  const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':'Bearer '+GROQ_KEY
+    },
+    body: JSON.stringify({
+      model,
+      messages: openAIMsgs,
+      tools: GROQ_TOOLS,
+      tool_choice: 'auto',
+      temperature: 0.7,
+      max_tokens: 8192
+    })
+  });
+  const d = await r.json();
+  if(!r.ok) throw new Error(d.error?.message||`Groq HTTP ${r.status}`);
+  return d;
+}
+
+// ─── HF Call ──────────────────────────────────────────────
+async function callHF(msgs) {
+  const model = document.getElementById('hfModel').value;
+  const systemPrompt = buildSystemPrompt();
+
+  // Build plain text conversation
+  const conversation = msgs.map(m => {
+    if (m.role === 'user')  return m.parts?.map(p=>p.text||'').join('')||'';
+    if (m.role === 'model') return m.parts?.filter(p=>p.text).map(p=>p.text).join('')||'';
+    return '';
+  }).filter(Boolean);
+
+  // HF Inference API - chat completions format
+  const messages = [{ role:'system', content: systemPrompt }];
+  msgs.forEach(m => {
+    if (m.role === 'user') {
+      const txt = m.parts?.map(p=>p.text||'').join('')||'';
+      if(txt) messages.push({ role:'user', content: txt });
+    } else if (m.role === 'model') {
+      const txt = m.parts?.filter(p=>p.text).map(p=>p.text).join('')||'';
+      if(txt) messages.push({ role:'assistant', content: txt });
+    }
+  });
+
+  const r = await fetch(`https://api-inference.huggingface.co/models/${model}/v1/chat/completions`, {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':'Bearer '+HF_KEY
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: 0.7,
+      max_tokens: 4096,
+      stream: false
+    })
+  });
+  const d = await r.json();
+  if(!r.ok) throw new Error(d.error?.message||JSON.stringify(d.error)||`HF HTTP ${r.status}`);
+  return d;
+}
+
 // ─── Send ─────────────────────────────────────────────────
 async function send(){
   if(busy) return;
   const inp = document.getElementById('msgInput');
   const text = inp.value.trim();
   if(!text) return;
-  if(!GEMINI_KEY){ alert('أضف Gemini API Key في الإعدادات أولاً!'); return; }
+
+  // Validate keys
+  if (PROVIDER === 'gemini' && !GEMINI_KEY) { alert('أضف Gemini API Key في الإعدادات!'); return; }
+  if (PROVIDER === 'groq'   && !GROQ_KEY)   { alert('أضف Groq API Key في الإعدادات!'); return; }
+  if (PROVIDER === 'hf'     && !HF_KEY)     { alert('أضف Hugging Face Token في الإعدادات!'); return; }
 
   busy=true;
   document.getElementById('sendBtn').disabled=true;
@@ -645,61 +918,128 @@ async function send(){
   history.push({ role:'user', parts:[{text}] });
 
   showThinking();
+
   try {
-    let resp = await callGemini(history);
-    hideThinking();
-
-    // ── Agentic loop ──
-    for(let round=0; round<10; round++){
-      const candidate = resp.candidates?.[0];
-      if(!candidate) throw new Error('لا يوجد رد من Gemini');
-
-      const parts     = candidate.content?.parts||[];
-      const fnCalls   = parts.filter(p=>p.functionCall);
-      const textParts = parts.filter(p=>p.text);
-
-      if(fnCalls.length===0){
-        // Final answer
-        addMsg('assistant', textParts.map(p=>p.text).join('\n'));
-        history.push({ role:'model', parts });
-        break;
-      }
-
-      // Show tool blocks
-      const toolBlocks = fnCalls.map(p=>({ name:p.functionCall.name, args:p.functionCall.args }));
-      const bub = addMsg('assistant',
-        textParts.map(p=>p.text).join('\n') || '⚡ جاري التنفيذ...',
-        toolBlocks
-      );
-      history.push({ role:'model', parts });
-
-      // Execute tools
-      const fnResponses = await Promise.all(fnCalls.map(async p=>{
-        const { name, args } = p.functionCall;
-        try {
-          const result = await execTool(name, args);
-          appendToolResult(bub, name, result, false);
-          return { functionResponse:{ name, response:{ result } } };
-        } catch(err){
-          appendToolResult(bub, name, `❌ ${err.message}`, true);
-          return { functionResponse:{ name, response:{ error:err.message } } };
-        }
-      }));
-
-      history.push({ role:'user', parts: fnResponses });
-      showThinking();
-      resp = await callGemini(history);
-      hideThinking();
+    if (PROVIDER === 'gemini') {
+      await sendGemini();
+    } else if (PROVIDER === 'groq') {
+      await sendGroq();
+    } else {
+      await sendHF();
     }
-
   } catch(err){
     hideThinking();
-    addMsg('assistant', `❌ **خطأ:** ${err.message}\n\nتأكد من صحة API Key وأنك فتحت Google AI Studio مجاناً على [aistudio.google.com](https://aistudio.google.com)`);
+    addMsg('assistant', `❌ **خطأ:** ${err.message}`);
   }
 
   busy=false;
   document.getElementById('sendBtn').disabled=false;
   document.getElementById('msgInput').focus();
+}
+
+// ─── Gemini Agentic Loop ──────────────────────────────────
+async function sendGemini(){
+  let resp = await callGemini(history);
+  hideThinking();
+
+  for(let round=0; round<10; round++){
+    const candidate = resp.candidates?.[0];
+    if(!candidate) throw new Error('لا يوجد رد من Gemini');
+
+    const parts   = candidate.content?.parts||[];
+    const fnCalls = parts.filter(p=>p.functionCall);
+    const txtParts = parts.filter(p=>p.text);
+
+    if(fnCalls.length===0){
+      addMsg('assistant', txtParts.map(p=>p.text).join('\n'));
+      history.push({ role:'model', parts });
+      break;
+    }
+
+    const toolBlocks = fnCalls.map(p=>({ name:p.functionCall.name, args:p.functionCall.args }));
+    const bub = addMsg('assistant', txtParts.map(p=>p.text).join('\n')||'⚡ جاري التنفيذ...', toolBlocks);
+    history.push({ role:'model', parts });
+
+    const fnResponses = await Promise.all(fnCalls.map(async p=>{
+      const { name, args } = p.functionCall;
+      try {
+        const result = await execTool(name, args);
+        appendToolResult(bub, name, result, false);
+        return { functionResponse:{ name, response:{ result } } };
+      } catch(err){
+        appendToolResult(bub, name, `❌ ${err.message}`, true);
+        return { functionResponse:{ name, response:{ error:err.message } } };
+      }
+    }));
+
+    history.push({ role:'user', parts: fnResponses });
+    showThinking();
+    resp = await callGemini(history);
+    hideThinking();
+  }
+}
+
+// ─── Groq Agentic Loop ────────────────────────────────────
+async function sendGroq(){
+  let resp = await callGroq(history);
+  hideThinking();
+
+  for(let round=0; round<10; round++){
+    const msg = resp.choices?.[0]?.message;
+    if(!msg) throw new Error('لا يوجد رد من Groq');
+
+    const toolCalls = msg.tool_calls||[];
+    const textContent = msg.content||'';
+
+    if(toolCalls.length===0){
+      addMsg('assistant', textContent);
+      history.push({ role:'model', parts:[{text: textContent}] });
+      break;
+    }
+
+    const toolBlocks = toolCalls.map(tc=>({
+      name: tc.function.name,
+      args: JSON.parse(tc.function.arguments||'{}')
+    }));
+    const bub = addMsg('assistant', textContent||'⚡ جاري التنفيذ...', toolBlocks);
+
+    // Store model turn in Gemini-compatible format for history
+    history.push({
+      role:'model',
+      parts: [
+        ...(textContent ? [{text: textContent}] : []),
+        ...toolCalls.map(tc=>({ functionCall:{ name:tc.function.name, args:JSON.parse(tc.function.arguments||'{}') } }))
+      ]
+    });
+
+    // Execute tools and build tool result parts
+    const resultParts = await Promise.all(toolCalls.map(async (tc,i) => {
+      const name = tc.function.name;
+      const args = JSON.parse(tc.function.arguments||'{}');
+      try {
+        const result = await execTool(name, args);
+        appendToolResult(bub, name, result, false);
+        return { functionResponse:{ name, response:{ result } } };
+      } catch(err){
+        appendToolResult(bub, name, `❌ ${err.message}`, true);
+        return { functionResponse:{ name, response:{ error:err.message } } };
+      }
+    }));
+
+    history.push({ role:'user', parts: resultParts });
+    showThinking();
+    resp = await callGroq(history);
+    hideThinking();
+  }
+}
+
+// ─── HF Simple (no tools) ────────────────────────────────
+async function sendHF(){
+  const resp = await callHF(history);
+  hideThinking();
+  const text = resp.choices?.[0]?.message?.content || '(لا يوجد رد)';
+  addMsg('assistant', text);
+  history.push({ role:'model', parts:[{text}] });
 }
 </script>
 </body>
