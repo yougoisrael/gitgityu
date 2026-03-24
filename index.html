@@ -13,6 +13,7 @@
   --gem:#a855f7;--gem2:#7c3aed;--blue:#1f6feb;
   --green:#238636;--red:#f85149;
   --groq:#f97316;--hf:#ff9900;
+  --together:#06b6d4;--deepseek:#3b82f6;--openrouter:#10b981;
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
 body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
@@ -83,6 +84,9 @@ header{
 .provider-section.gemini-sec .section-label{color:var(--gem)}
 .provider-section.groq-sec .section-label{color:var(--groq)}
 .provider-section.hf-sec .section-label{color:var(--hf)}
+.provider-section.together-sec .section-label{color:var(--together)}
+.provider-section.deepseek-sec .section-label{color:var(--deepseek)}
+.provider-section.openrouter-sec .section-label{color:var(--openrouter)}
 
 /* ── Chat ────────────────────────────────────────────────── */
 #chatArea{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
@@ -102,6 +106,9 @@ header{
 .msg.assistant .av{background:linear-gradient(135deg,var(--gem),var(--gem2))}
 .msg.assistant.groq-msg .av{background:linear-gradient(135deg,var(--groq),#ea580c)}
 .msg.assistant.hf-msg .av{background:linear-gradient(135deg,var(--hf),#f59e0b)}
+.msg.assistant.together-msg .av{background:linear-gradient(135deg,var(--together),#0891b2)}
+.msg.assistant.deepseek-msg .av{background:linear-gradient(135deg,var(--deepseek),#2563eb)}
+.msg.assistant.openrouter-msg .av{background:linear-gradient(135deg,var(--openrouter),#059669)}
 
 .bubble{
   background:var(--surface);border:1px solid var(--border);
@@ -191,6 +198,9 @@ header{
 .model-badge span{color:var(--gem)}
 .model-badge span.groq-badge{color:var(--groq)}
 .model-badge span.hf-badge{color:var(--hf)}
+.model-badge span.together-badge{color:var(--together)}
+.model-badge span.deepseek-badge{color:var(--deepseek)}
+.model-badge span.openrouter-badge{color:var(--openrouter)}
 
 /* Welcome bullets */
 .welcome-list{margin-top:10px;padding-right:18px;display:flex;flex-direction:column;gap:5px}
@@ -204,6 +214,9 @@ header{
 .provider-pill.gemini{background:rgba(168,85,247,.15);color:var(--gem);border:1px solid rgba(168,85,247,.3)}
 .provider-pill.groq{background:rgba(249,115,22,.15);color:var(--groq);border:1px solid rgba(249,115,22,.3)}
 .provider-pill.hf{background:rgba(255,153,0,.15);color:var(--hf);border:1px solid rgba(255,153,0,.3)}
+.provider-pill.together{background:rgba(6,182,212,.15);color:var(--together);border:1px solid rgba(6,182,212,.3)}
+.provider-pill.deepseek{background:rgba(59,130,246,.15);color:var(--deepseek);border:1px solid rgba(59,130,246,.3)}
+.provider-pill.openrouter{background:rgba(16,185,129,.15);color:var(--openrouter);border:1px solid rgba(16,185,129,.3)}
 
 /* HF note */
 .hf-note{
@@ -232,6 +245,9 @@ header{
     <select class="provider-select" id="providerSelect" onchange="switchProvider(this.value)" title="اختر مزود الذكاء الاصطناعي">
       <option value="gemini">🔮 Gemini</option>
       <option value="groq">⚡ Groq</option>
+      <option value="together">🌊 Together AI</option>
+      <option value="deepseek">🐬 DeepSeek</option>
+      <option value="openrouter">🌐 OpenRouter</option>
       <option value="hf">🤗 Hugging Face</option>
     </select>
     <button class="setup-toggle" onclick="toggleSetup()">
@@ -293,6 +309,71 @@ header{
     </div>
   </div>
 
+  <!-- Together AI Section -->
+  <div class="provider-section together-sec" id="togetherSection">
+    <div class="section-label">🌊 Together AI — Open Models + Function Calling</div>
+    <div class="field">
+      <label>🔑 Together API Key</label>
+      <input type="password" id="togetherKey" placeholder="together_..." />
+    </div>
+    <div class="field" style="max-width:280px">
+      <label>🧠 النموذج</label>
+      <select id="togetherModel">
+        <option value="meta-llama/Llama-3.3-70B-Instruct-Turbo">Llama 3.3 70B Instruct Turbo</option>
+        <option value="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo">Llama 3.1 70B Instruct Turbo</option>
+        <option value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Llama 3.1 8B Instruct Turbo</option>
+        <option value="meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo">Llama 3.2 90B Vision Turbo</option>
+        <option value="Qwen/Qwen2.5-72B-Instruct-Turbo">Qwen 2.5 72B Instruct Turbo</option>
+        <option value="Qwen/Qwen2.5-7B-Instruct-Turbo">Qwen 2.5 7B Instruct Turbo</option>
+        <option value="Qwen/QwQ-32B-Preview">Qwen QwQ 32B (Reasoning)</option>
+        <option value="mistralai/Mixtral-8x7B-Instruct-v0.1">Mixtral 8x7B Instruct</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- DeepSeek Section -->
+  <div class="provider-section deepseek-sec" id="deepseekSection">
+    <div class="section-label">🐬 DeepSeek — High-performance + Function Calling</div>
+    <div class="field">
+      <label>🔑 DeepSeek API Key</label>
+      <input type="password" id="deepseekKey" placeholder="sk-..." />
+    </div>
+    <div class="field" style="max-width:240px">
+      <label>🧠 النموذج</label>
+      <select id="deepseekModel">
+        <option value="deepseek-chat">deepseek-chat (V3) — موصى به</option>
+        <option value="deepseek-reasoner">deepseek-reasoner (R1)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- OpenRouter Section -->
+  <div class="provider-section openrouter-sec" id="openrouterSection">
+    <div class="section-label">🌐 OpenRouter — مئات النماذج بمفتاح واحد</div>
+    <div class="field">
+      <label>🔑 OpenRouter API Key</label>
+      <input type="password" id="openrouterKey" placeholder="sk-or-v1-..." />
+    </div>
+    <div class="field" style="max-width:320px">
+      <label>🧠 النموذج</label>
+      <select id="openrouterModel">
+        <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (مجاني)</option>
+        <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B (مجاني)</option>
+        <option value="deepseek/deepseek-chat">DeepSeek V3</option>
+        <option value="deepseek/deepseek-r1:free">DeepSeek R1 (مجاني)</option>
+        <option value="qwen/qwen-2.5-72b-instruct">Qwen 2.5 72B</option>
+        <option value="mistralai/mistral-7b-instruct:free">Mistral 7B (مجاني)</option>
+        <option value="google/gemma-3-27b-it:free">Gemma 3 27B (مجاني)</option>
+        <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+        <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+      </select>
+    </div>
+    <div class="field" style="max-width:240px">
+      <label>📋 أو أدخل Model ID يدوياً</label>
+      <input type="text" id="openrouterCustomModel" placeholder="provider/model-name" />
+    </div>
+  </div>
+
   <!-- Hugging Face Section -->
   <div class="provider-section hf-sec" id="hfSection">
     <div class="section-label">🤗 Hugging Face — Inference API</div>
@@ -331,6 +412,9 @@ header{
       <ul class="welcome-list">
         <li><span class="provider-pill gemini">🔮 Gemini</span> — أذكى + GitHub tools كاملة</li>
         <li><span class="provider-pill groq">⚡ Groq</span> — أسرع إجابة + GitHub tools كاملة</li>
+        <li><span class="provider-pill together">🌊 Together AI</span> — Llama 3 + Qwen + GitHub tools</li>
+        <li><span class="provider-pill deepseek">🐬 DeepSeek</span> — V3/R1 + GitHub tools كاملة</li>
+        <li><span class="provider-pill openrouter">🌐 OpenRouter</span> — مئات النماذج + GitHub tools</li>
         <li><span class="provider-pill hf">🤗 HF</span> — نماذج مفتوحة المصدر</li>
       </ul>
       <ul class="welcome-list" style="margin-top:10px">
@@ -360,36 +444,54 @@ header{
 
 <script>
 // ─── State ───────────────────────────────────────────────
-let GEMINI_KEY = '', GH_TOKEN = '', GH_USER = '';
-let GROQ_KEY   = '';
-let HF_KEY     = '';
-let PROVIDER   = 'gemini'; // 'gemini' | 'groq' | 'hf'
-let history    = [];
-let zipFiles   = {};
-let zipName    = '';
-let busy       = false;
+let GEMINI_KEY      = '', GH_TOKEN = '', GH_USER = '';
+let GROQ_KEY        = '';
+let HF_KEY          = '';
+let TOGETHER_KEY    = '';
+let DEEPSEEK_KEY    = '';
+let OPENROUTER_KEY  = '';
+let PROVIDER        = 'gemini'; // 'gemini'|'groq'|'together'|'deepseek'|'openrouter'|'hf'
+let history         = [];
+let zipFiles        = {};
+let zipName         = '';
+let busy            = false;
 
 // ─── Init ────────────────────────────────────────────────
 (function init() {
-  GEMINI_KEY = ls('gk');
-  GH_TOKEN   = ls('ght');
-  GH_USER    = ls('ghu');
-  GROQ_KEY   = ls('groqk');
-  HF_KEY     = ls('hfk');
-  PROVIDER   = ls('provider') || 'gemini';
+  GEMINI_KEY     = ls('gk');
+  GH_TOKEN       = ls('ght');
+  GH_USER        = ls('ghu');
+  GROQ_KEY       = ls('groqk');
+  HF_KEY         = ls('hfk');
+  TOGETHER_KEY   = ls('togetherk');
+  DEEPSEEK_KEY   = ls('deepseekk');
+  OPENROUTER_KEY = ls('openrouterk');
+  PROVIDER       = ls('provider') || 'gemini';
 
-  if (GEMINI_KEY) document.getElementById('geminiKey').value = GEMINI_KEY;
-  if (GH_TOKEN)   document.getElementById('githubToken').value = GH_TOKEN;
-  if (GH_USER)    document.getElementById('githubUser').value = GH_USER;
-  if (GROQ_KEY)   document.getElementById('groqKey').value = GROQ_KEY;
-  if (HF_KEY)     document.getElementById('hfKey').value = HF_KEY;
+  if (GEMINI_KEY)     document.getElementById('geminiKey').value      = GEMINI_KEY;
+  if (GH_TOKEN)       document.getElementById('githubToken').value    = GH_TOKEN;
+  if (GH_USER)        document.getElementById('githubUser').value     = GH_USER;
+  if (GROQ_KEY)       document.getElementById('groqKey').value        = GROQ_KEY;
+  if (HF_KEY)         document.getElementById('hfKey').value          = HF_KEY;
+  if (TOGETHER_KEY)   document.getElementById('togetherKey').value    = TOGETHER_KEY;
+  if (DEEPSEEK_KEY)   document.getElementById('deepseekKey').value    = DEEPSEEK_KEY;
+  if (OPENROUTER_KEY) document.getElementById('openrouterKey').value  = OPENROUTER_KEY;
 
-  const savedGeminiModel = ls('geminiModel');
-  const savedGroqModel   = ls('groqModel');
-  const savedHfModel     = ls('hfModel');
-  if (savedGeminiModel) document.getElementById('geminiModel').value = savedGeminiModel;
-  if (savedGroqModel)   document.getElementById('groqModel').value   = savedGroqModel;
-  if (savedHfModel)     document.getElementById('hfModel').value     = savedHfModel;
+  const savedGeminiModel      = ls('geminiModel');
+  const savedGroqModel        = ls('groqModel');
+  const savedHfModel          = ls('hfModel');
+  const savedTogetherModel    = ls('togetherModel');
+  const savedDeepseekModel    = ls('deepseekModel');
+  const savedOpenrouterModel  = ls('openrouterModel');
+  const savedOpenrouterCustom = ls('openrouterCustomModel');
+
+  if (savedGeminiModel)      document.getElementById('geminiModel').value           = savedGeminiModel;
+  if (savedGroqModel)        document.getElementById('groqModel').value             = savedGroqModel;
+  if (savedHfModel)          document.getElementById('hfModel').value               = savedHfModel;
+  if (savedTogetherModel)    document.getElementById('togetherModel').value         = savedTogetherModel;
+  if (savedDeepseekModel)    document.getElementById('deepseekModel').value         = savedDeepseekModel;
+  if (savedOpenrouterModel)  document.getElementById('openrouterModel').value       = savedOpenrouterModel;
+  if (savedOpenrouterCustom) document.getElementById('openrouterCustomModel').value = savedOpenrouterCustom;
 
   document.getElementById('providerSelect').value = PROVIDER;
   switchProvider(PROVIDER, true);
@@ -399,22 +501,32 @@ let busy       = false;
 function ls(k){ return localStorage.getItem(k)||'' }
 
 function saveSettings() {
-  GEMINI_KEY = document.getElementById('geminiKey').value.trim();
-  GH_TOKEN   = document.getElementById('githubToken').value.trim();
-  GH_USER    = document.getElementById('githubUser').value.trim();
-  GROQ_KEY   = document.getElementById('groqKey').value.trim();
-  HF_KEY     = document.getElementById('hfKey').value.trim();
+  GEMINI_KEY     = document.getElementById('geminiKey').value.trim();
+  GH_TOKEN       = document.getElementById('githubToken').value.trim();
+  GH_USER        = document.getElementById('githubUser').value.trim();
+  GROQ_KEY       = document.getElementById('groqKey').value.trim();
+  HF_KEY         = document.getElementById('hfKey').value.trim();
+  TOGETHER_KEY   = document.getElementById('togetherKey').value.trim();
+  DEEPSEEK_KEY   = document.getElementById('deepseekKey').value.trim();
+  OPENROUTER_KEY = document.getElementById('openrouterKey').value.trim();
 
-  if (GEMINI_KEY) localStorage.setItem('gk', GEMINI_KEY);
-  if (GH_TOKEN)   localStorage.setItem('ght', GH_TOKEN);
-  if (GH_USER)    localStorage.setItem('ghu', GH_USER);
-  if (GROQ_KEY)   localStorage.setItem('groqk', GROQ_KEY);
-  if (HF_KEY)     localStorage.setItem('hfk', HF_KEY);
+  if (GEMINI_KEY)     localStorage.setItem('gk',            GEMINI_KEY);
+  if (GH_TOKEN)       localStorage.setItem('ght',           GH_TOKEN);
+  if (GH_USER)        localStorage.setItem('ghu',           GH_USER);
+  if (GROQ_KEY)       localStorage.setItem('groqk',         GROQ_KEY);
+  if (HF_KEY)         localStorage.setItem('hfk',           HF_KEY);
+  if (TOGETHER_KEY)   localStorage.setItem('togetherk',     TOGETHER_KEY);
+  if (DEEPSEEK_KEY)   localStorage.setItem('deepseekk',     DEEPSEEK_KEY);
+  if (OPENROUTER_KEY) localStorage.setItem('openrouterk',   OPENROUTER_KEY);
 
-  localStorage.setItem('geminiModel', document.getElementById('geminiModel').value);
-  localStorage.setItem('groqModel',   document.getElementById('groqModel').value);
-  localStorage.setItem('hfModel',     document.getElementById('hfModel').value);
-  localStorage.setItem('provider',    PROVIDER);
+  localStorage.setItem('geminiModel',           document.getElementById('geminiModel').value);
+  localStorage.setItem('groqModel',             document.getElementById('groqModel').value);
+  localStorage.setItem('hfModel',               document.getElementById('hfModel').value);
+  localStorage.setItem('togetherModel',         document.getElementById('togetherModel').value);
+  localStorage.setItem('deepseekModel',         document.getElementById('deepseekModel').value);
+  localStorage.setItem('openrouterModel',       document.getElementById('openrouterModel').value);
+  localStorage.setItem('openrouterCustomModel', document.getElementById('openrouterCustomModel').value);
+  localStorage.setItem('provider',              PROVIDER);
 
   updateDot();
   updateModelBadge();
@@ -425,27 +537,47 @@ function saveSettings() {
 
 function updateDot() {
   let hasKey = false;
-  if (PROVIDER === 'gemini') hasKey = !!GEMINI_KEY;
-  if (PROVIDER === 'groq')   hasKey = !!GROQ_KEY;
-  if (PROVIDER === 'hf')     hasKey = !!HF_KEY;
-  const on = hasKey && (PROVIDER === 'hf' || (GH_TOKEN && GH_USER));
+  if (PROVIDER === 'gemini')     hasKey = !!GEMINI_KEY;
+  if (PROVIDER === 'groq')       hasKey = !!GROQ_KEY;
+  if (PROVIDER === 'hf')         hasKey = !!HF_KEY;
+  if (PROVIDER === 'together')   hasKey = !!TOGETHER_KEY;
+  if (PROVIDER === 'deepseek')   hasKey = !!DEEPSEEK_KEY;
+  if (PROVIDER === 'openrouter') hasKey = !!OPENROUTER_KEY;
+  const noGhNeeded = (PROVIDER === 'hf');
+  const on = hasKey && (noGhNeeded || (GH_TOKEN && GH_USER));
   document.getElementById('statusDot').className = 'dot' + (on ? ' on' : '');
 }
 
 function switchProvider(val, silent) {
   PROVIDER = val;
-  // Show/hide sections
-  document.getElementById('geminiSection').className = 'provider-section gemini-sec' + (val==='gemini'?' active':'');
-  document.getElementById('groqSection').className   = 'provider-section groq-sec'   + (val==='groq'?' active':'');
-  document.getElementById('hfSection').className     = 'provider-section hf-sec'     + (val==='hf'?' active':'');
+  const allSections = ['gemini','groq','hf','together','deepseek','openrouter'];
+  allSections.forEach(p => {
+    const sec = document.getElementById(p+'Section');
+    if (sec) {
+      const base = sec.className.replace(' active','');
+      sec.className = base + (val===p?' active':'');
+    }
+  });
   updateDot();
   updateModelBadge();
   if (!silent) {
-    history = []; // reset conversation on provider switch
-    const emoji = val==='gemini'?'🔮':val==='groq'?'⚡':'🤗';
-    const name  = val==='gemini'?'Gemini':val==='groq'?'Groq':'Hugging Face';
+    history = [];
+    const map = {
+      gemini:     ['🔮','Gemini'],
+      groq:       ['⚡','Groq'],
+      together:   ['🌊','Together AI'],
+      deepseek:   ['🐬','DeepSeek'],
+      openrouter: ['🌐','OpenRouter'],
+      hf:         ['🤗','Hugging Face']
+    };
+    const [emoji, name] = map[val] || ['🤖', val];
     addMsg('assistant', `${emoji} تم التبديل إلى <strong>${name}</strong>. المحادثة أُعيدت من البداية.`);
   }
+}
+
+function getOpenrouterModel() {
+  const custom = document.getElementById('openrouterCustomModel').value.trim();
+  return custom || document.getElementById('openrouterModel').value;
 }
 
 function updateModelBadge() {
@@ -456,6 +588,15 @@ function updateModelBadge() {
   } else if (PROVIDER === 'groq') {
     const m = document.getElementById('groqModel').value;
     badge.innerHTML = `⚡ ${m} · <span class="groq-badge">Groq</span> · <span>GitHub REST API v3</span>`;
+  } else if (PROVIDER === 'together') {
+    const m = document.getElementById('togetherModel').value.split('/').pop();
+    badge.innerHTML = `🌊 ${m} · <span class="together-badge">Together AI</span> · <span>GitHub REST API v3</span>`;
+  } else if (PROVIDER === 'deepseek') {
+    const m = document.getElementById('deepseekModel').value;
+    badge.innerHTML = `🐬 ${m} · <span class="deepseek-badge">DeepSeek</span> · <span>GitHub REST API v3</span>`;
+  } else if (PROVIDER === 'openrouter') {
+    const m = getOpenrouterModel().split('/').pop();
+    badge.innerHTML = `🌐 ${m} · <span class="openrouter-badge">OpenRouter</span> · <span>GitHub REST API v3</span>`;
   } else {
     const m = document.getElementById('hfModel').value;
     badge.innerHTML = `🤗 ${m.split('/')[1]||m} · <span class="hf-badge">Hugging Face</span> · <em style="color:var(--red)">no GitHub tools</em>`;
@@ -528,13 +669,17 @@ function addMsg(role, html, toolBlocks){
   const wrap = document.createElement('div');
   wrap.className = `msg ${role}`;
   if (role === 'assistant') {
-    if (PROVIDER === 'groq') wrap.classList.add('groq-msg');
-    if (PROVIDER === 'hf')   wrap.classList.add('hf-msg');
+    if (PROVIDER === 'groq')       wrap.classList.add('groq-msg');
+    if (PROVIDER === 'hf')         wrap.classList.add('hf-msg');
+    if (PROVIDER === 'together')   wrap.classList.add('together-msg');
+    if (PROVIDER === 'deepseek')   wrap.classList.add('deepseek-msg');
+    if (PROVIDER === 'openrouter') wrap.classList.add('openrouter-msg');
   }
 
   const av = document.createElement('div');
   av.className = 'av';
-  av.textContent = role==='user' ? '👤' : (PROVIDER==='groq'?'⚡':PROVIDER==='hf'?'🤗':'🤖');
+  const emojiMap = { user:'👤', gemini:'🤖', groq:'⚡', hf:'🤗', together:'🌊', deepseek:'🐬', openrouter:'🌐' };
+  av.textContent = role==='user' ? '👤' : (emojiMap[PROVIDER]||'🤖');
 
   const bub = document.createElement('div');
   bub.className = 'bubble';
@@ -582,9 +727,13 @@ function showThinking(){
   const chat = document.getElementById('chatArea');
   const d = document.createElement('div');
   d.className='msg assistant'; d.id='thinking';
-  const emoji = PROVIDER==='groq'?'⚡':PROVIDER==='hf'?'🤗':'🤖';
-  if(PROVIDER==='groq') d.classList.add('groq-msg');
-  if(PROVIDER==='hf')   d.classList.add('hf-msg');
+  const emojiMap = { gemini:'🤖', groq:'⚡', hf:'🤗', together:'🌊', deepseek:'🐬', openrouter:'🌐' };
+  const emoji = emojiMap[PROVIDER]||'🤖';
+  if(PROVIDER==='groq')       d.classList.add('groq-msg');
+  if(PROVIDER==='hf')         d.classList.add('hf-msg');
+  if(PROVIDER==='together')   d.classList.add('together-msg');
+  if(PROVIDER==='deepseek')   d.classList.add('deepseek-msg');
+  if(PROVIDER==='openrouter') d.classList.add('openrouter-msg');
   d.innerHTML=`<div class="av">${emoji}</div><div class="bubble"><div class="thinking"><b></b><b></b><b></b></div></div>`;
   chat.appendChild(d);
   chat.scrollTop=chat.scrollHeight;
@@ -625,7 +774,7 @@ async function getDefaultBranch(owner, repo){
   return info.default_branch || 'main';
 }
 
-// ─── Tools (shared Gemini + Groq) ────────────────────────
+// ─── Tools (shared across all providers) ─────────────────
 const TOOL_DECLARATIONS = [
   {
     name:'create_repository',
@@ -690,11 +839,14 @@ const GEMINI_TOOLS = [{ function_declarations: TOOL_DECLARATIONS.map(t=>({
   }
 })) }];
 
-// Groq/OpenAI format
-const GROQ_TOOLS = TOOL_DECLARATIONS.map(t=>({
+// OpenAI-compatible format (Groq, Together, DeepSeek, OpenRouter)
+const OPENAI_TOOLS = TOOL_DECLARATIONS.map(t=>({
   type: 'function',
   function: { name: t.name, description: t.description, parameters: t.parameters }
 }));
+
+// Keep backward-compat alias
+const GROQ_TOOLS = OPENAI_TOOLS;
 
 async function execTool(name, args){
   switch(name){
@@ -798,76 +950,67 @@ async function callGemini(msgs){
   return d;
 }
 
-// ─── Groq Call ────────────────────────────────────────────
-function geminiHistoryToOpenAI(msgs) {
-  return msgs.map(m => {
-    if (m.role === 'user') {
-      const fnResults = m.parts?.filter(p=>p.functionResponse);
-      if (fnResults && fnResults.length > 0) {
-        return fnResults.map(p=>({
-          role: 'tool',
-          tool_call_id: p.functionResponse.name,
-          content: JSON.stringify(p.functionResponse.response)
-        }));
-      }
-      return [{ role:'user', content: m.parts?.map(p=>p.text||'').join('') || '' }];
-    }
-    if (m.role === 'model') {
-      const textParts = m.parts?.filter(p=>p.text).map(p=>p.text).join('') || '';
-      const fnCalls   = m.parts?.filter(p=>p.functionCall)||[];
-      const msg = { role:'assistant', content: textParts||null };
-      if (fnCalls.length > 0) {
-        msg.tool_calls = fnCalls.map((p,i)=>({
-          id: p.functionCall.name + '_' + i,
-          type: 'function',
-          function: { name: p.functionCall.name, arguments: JSON.stringify(p.functionCall.args) }
-        }));
-      }
-      return [msg];
-    }
-    return [];
-  }).flat().filter(Boolean);
-}
-
-async function callGroq(msgs) {
-  const model = document.getElementById('groqModel').value || 'llama-3.3-70b-versatile';
+// ─── Generic OpenAI-compatible Call ──────────────────────
+// Used by: Groq, Together AI, DeepSeek, OpenRouter
+async function callOpenAICompat(msgs, endpoint, apiKey, model, extraHeaders={}) {
   const openAIMsgs = [
     { role:'system', content: buildSystemPrompt() },
     ...geminiHistoryToOpenAI(msgs)
   ];
-  const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const r = await fetch(endpoint, {
     method:'POST',
     headers:{
       'Content-Type':'application/json',
-      'Authorization':'Bearer '+GROQ_KEY
+      'Authorization':'Bearer '+apiKey,
+      ...extraHeaders
     },
     body: JSON.stringify({
       model,
       messages: openAIMsgs,
-      tools: GROQ_TOOLS,
+      tools: OPENAI_TOOLS,
       tool_choice: 'auto',
       temperature: 0.7,
       max_tokens: 8192
     })
   });
   const d = await r.json();
-  if(!r.ok) throw new Error(d.error?.message||`Groq HTTP ${r.status}`);
+  if(!r.ok) throw new Error(d.error?.message||`HTTP ${r.status}: ${JSON.stringify(d.error||d)}`);
   return d;
+}
+
+async function callGroq(msgs) {
+  const model = document.getElementById('groqModel').value || 'llama-3.3-70b-versatile';
+  return callOpenAICompat(msgs, 'https://api.groq.com/openai/v1/chat/completions', GROQ_KEY, model);
+}
+
+async function callTogether(msgs) {
+  const model = document.getElementById('togetherModel').value || 'meta-llama/Llama-3.3-70B-Instruct-Turbo';
+  return callOpenAICompat(msgs, 'https://api.together.xyz/v1/chat/completions', TOGETHER_KEY, model);
+}
+
+async function callDeepSeek(msgs) {
+  const model = document.getElementById('deepseekModel').value || 'deepseek-chat';
+  return callOpenAICompat(msgs, 'https://api.deepseek.com/v1/chat/completions', DEEPSEEK_KEY, model);
+}
+
+async function callOpenRouter(msgs) {
+  const model = getOpenrouterModel() || 'meta-llama/llama-3.3-70b-instruct:free';
+  return callOpenAICompat(
+    msgs,
+    'https://openrouter.ai/api/v1/chat/completions',
+    OPENROUTER_KEY,
+    model,
+    {
+      'HTTP-Referer': window.location.href,
+      'X-Title': 'AI × GitHub Assistant'
+    }
+  );
 }
 
 // ─── HF Call ──────────────────────────────────────────────
 async function callHF(msgs) {
   const model = document.getElementById('hfModel').value;
   const systemPrompt = buildSystemPrompt();
-
-  // Build plain text conversation
-  const conversation = msgs.map(m => {
-    if (m.role === 'user')  return m.parts?.map(p=>p.text||'').join('')||'';
-    if (m.role === 'model') return m.parts?.filter(p=>p.text).map(p=>p.text).join('')||'';
-    return '';
-  }).filter(Boolean);
-
-  // HF Inference API - chat completions format
   const messages = [{ role:'system', content: systemPrompt }];
   msgs.forEach(m => {
     if (m.role === 'user') {
@@ -898,6 +1041,37 @@ async function callHF(msgs) {
   return d;
 }
 
+// ─── History conversion: Gemini → OpenAI ──────────────────
+function geminiHistoryToOpenAI(msgs) {
+  return msgs.map(m => {
+    if (m.role === 'user') {
+      const fnResults = m.parts?.filter(p=>p.functionResponse);
+      if (fnResults && fnResults.length > 0) {
+        return fnResults.map(p=>({
+          role: 'tool',
+          tool_call_id: p.functionResponse.name,
+          content: JSON.stringify(p.functionResponse.response)
+        }));
+      }
+      return [{ role:'user', content: m.parts?.map(p=>p.text||'').join('') || '' }];
+    }
+    if (m.role === 'model') {
+      const textParts = m.parts?.filter(p=>p.text).map(p=>p.text).join('') || '';
+      const fnCalls   = m.parts?.filter(p=>p.functionCall)||[];
+      const msg = { role:'assistant', content: textParts||null };
+      if (fnCalls.length > 0) {
+        msg.tool_calls = fnCalls.map((p,i)=>({
+          id: p.functionCall.name + '_' + i,
+          type: 'function',
+          function: { name: p.functionCall.name, arguments: JSON.stringify(p.functionCall.args) }
+        }));
+      }
+      return [msg];
+    }
+    return [];
+  }).flat().filter(Boolean);
+}
+
 // ─── Send ─────────────────────────────────────────────────
 async function send(){
   if(busy) return;
@@ -906,9 +1080,16 @@ async function send(){
   if(!text) return;
 
   // Validate keys
-  if (PROVIDER === 'gemini' && !GEMINI_KEY) { alert('أضف Gemini API Key في الإعدادات!'); return; }
-  if (PROVIDER === 'groq'   && !GROQ_KEY)   { alert('أضف Groq API Key في الإعدادات!'); return; }
-  if (PROVIDER === 'hf'     && !HF_KEY)     { alert('أضف Hugging Face Token في الإعدادات!'); return; }
+  const keyMap = {
+    gemini:     [GEMINI_KEY,     'أضف Gemini API Key في الإعدادات!'],
+    groq:       [GROQ_KEY,       'أضف Groq API Key في الإعدادات!'],
+    hf:         [HF_KEY,         'أضف Hugging Face Token في الإعدادات!'],
+    together:   [TOGETHER_KEY,   'أضف Together AI API Key في الإعدادات!'],
+    deepseek:   [DEEPSEEK_KEY,   'أضف DeepSeek API Key في الإعدادات!'],
+    openrouter: [OPENROUTER_KEY, 'أضف OpenRouter API Key في الإعدادات!']
+  };
+  const [key, msg] = keyMap[PROVIDER] || ['', 'أضف API Key في الإعدادات!'];
+  if (!key) { alert(msg); return; }
 
   busy=true;
   document.getElementById('sendBtn').disabled=true;
@@ -922,10 +1103,11 @@ async function send(){
   try {
     if (PROVIDER === 'gemini') {
       await sendGemini();
-    } else if (PROVIDER === 'groq') {
-      await sendGroq();
-    } else {
+    } else if (PROVIDER === 'hf') {
       await sendHF();
+    } else {
+      // Groq, Together, DeepSeek, OpenRouter all use the same OpenAI-compatible agentic loop
+      await sendOpenAICompat();
     }
   } catch(err){
     hideThinking();
@@ -979,16 +1161,26 @@ async function sendGemini(){
   }
 }
 
-// ─── Groq Agentic Loop ────────────────────────────────────
-async function sendGroq(){
-  let resp = await callGroq(history);
+// ─── Generic OpenAI-compatible Agentic Loop ───────────────
+// Handles: Groq, Together AI, DeepSeek, OpenRouter
+async function sendOpenAICompat(){
+  const callerMap = {
+    groq:       callGroq,
+    together:   callTogether,
+    deepseek:   callDeepSeek,
+    openrouter: callOpenRouter
+  };
+  const caller = callerMap[PROVIDER];
+  if (!caller) throw new Error('مزود غير معروف: '+PROVIDER);
+
+  let resp = await caller(history);
   hideThinking();
 
   for(let round=0; round<10; round++){
     const msg = resp.choices?.[0]?.message;
-    if(!msg) throw new Error('لا يوجد رد من Groq');
+    if(!msg) throw new Error(`لا يوجد رد من ${PROVIDER}`);
 
-    const toolCalls = msg.tool_calls||[];
+    const toolCalls   = msg.tool_calls||[];
     const textContent = msg.content||'';
 
     if(toolCalls.length===0){
@@ -1003,7 +1195,6 @@ async function sendGroq(){
     }));
     const bub = addMsg('assistant', textContent||'⚡ جاري التنفيذ...', toolBlocks);
 
-    // Store model turn in Gemini-compatible format for history
     history.push({
       role:'model',
       parts: [
@@ -1012,8 +1203,7 @@ async function sendGroq(){
       ]
     });
 
-    // Execute tools and build tool result parts
-    const resultParts = await Promise.all(toolCalls.map(async (tc,i) => {
+    const resultParts = await Promise.all(toolCalls.map(async (tc) => {
       const name = tc.function.name;
       const args = JSON.parse(tc.function.arguments||'{}');
       try {
@@ -1028,7 +1218,7 @@ async function sendGroq(){
 
     history.push({ role:'user', parts: resultParts });
     showThinking();
-    resp = await callGroq(history);
+    resp = await caller(history);
     hideThinking();
   }
 }
